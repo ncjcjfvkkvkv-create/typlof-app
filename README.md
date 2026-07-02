@@ -44,22 +44,7 @@ git clone https://github.com/ncjcjfvkkvkv-create/typlof-app.git
 cd typlof-app
 pip install flask
 python app.py
-
-
-```bash
-cat > README.md << 'EOF'
-# ⌨️ TyplOf — Professional Typing Trainer
-
-[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)](https://github.com/ncjcjfvkkvkv-create/typlof-app)
-[![Version](https://img.shields.io/badge/Version-3.0.0-red?style=for-the-badge)](https://github.com/ncjcjfvkkvkv-create/typlof-app)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.0+-orange?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![License](https://img.shields.io/github/license/ncjcjfvkkvkv-create/typlof-app?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/ncjcjfvkkvkv-create/typlof-app?style=for-the-badge)](https://github.com/ncjcjfvkkvkv-create/typlof-app)
-[![Forks](https://img.shields.io/github/forks/ncjcjfvkkvkv-create/typlof-app?style=for-the-badge)](https://github.com/ncjcjfvkkvkv-create/typlof-app)
-
----
+```
 
 ## 📖 About The Project
 
@@ -87,7 +72,7 @@ cat > README.md << 'EOF'
 
 ### Method 1: Git Clone (Recommended)
 
-```bash
+```
 git clone https://github.com/ncjcjfvkkvkv-create/typlof-app.git
 cd typlof-app
 pip install flask
