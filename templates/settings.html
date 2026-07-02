@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TyplOf — Settings</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container settings-container">
+    <div class="header">
+        <a href="/" class="logo-link">
+            <div class="logo">⌨️ TyplOf</div>
+        </a>
+        <div class="header-right">
+            <a href="/" class="back-home-btn">🏠 Home</a>
+            <a href="/dashboard" class="back-home-btn">📊 Dashboard</a>
+            <a href="/rules" class="back-home-btn">📖 Rules</a>
+        </div>
+    </div>
+
+    <div class="settings-content">
+        <h1>⚙️ Settings</h1>
+        <p class="settings-subtitle">Customize your typing experience</p>
+        
+        <div class="settings-grid">
+            <!-- ===== بخش ۱: سختی بازی ===== -->
+            <div class="settings-card">
+                <h3>🎯 Difficulty Level</h3>
+                <div class="setting-item">
+                    <label>Difficulty</label>
+                    <select id="difficultySelect">
+                        <option value="beginner">🌱 Beginner</option>
+                        <option value="easy">🟢 Easy</option>
+                        <option value="normal" selected>🟡 Normal</option>
+                        <option value="hard">🔴 Hard</option>
+                        <option value="expert">💀 Expert</option>
+                        <option value="insane">🔥 Insane</option>
+                        <option value="godmode">👑 God Mode</option>
+                    </select>
+                </div>
+                <div class="setting-desc" id="difficultyDesc">
+                    Normal: Standard typing practice
+                </div>
+                <div class="setting-detail" id="difficultyDetail">
+                    ⏱️ 10s per word | ❌ -5 penalty | 🔑 -4 adjacent
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۲: زمان ===== -->
+            <div class="settings-card">
+                <h3>⏱️ Time Settings</h3>
+                <div class="setting-item">
+                    <label>Time per word</label>
+                    <input type="range" id="timePerWord" min="2" max="25" value="10">
+                    <span id="timePerWordValue">10s</span>
+                </div>
+                <div class="setting-item">
+                    <label>Time penalty</label>
+                    <input type="number" id="timePenalty" value="7" min="1" max="20">
+                    <span>points</span>
+                </div>
+                <div class="setting-item">
+                    <label>Enable time limit</label>
+                    <input type="checkbox" id="enableTimer" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Warning at (seconds)</label>
+                    <input type="number" id="warningTime" value="3" min="1" max="10">
+                    <span>s</span>
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۳: امتیازدهی ===== -->
+            <div class="settings-card">
+                <h3>⭐ Scoring System</h3>
+                <div class="setting-item">
+                    <label>Correct word bonus</label>
+                    <input type="number" id="correctBonus" value="3" min="1" max="10">
+                    <span>per char</span>
+                </div>
+                <div class="setting-item">
+                    <label>Wrong word penalty</label>
+                    <input type="number" id="wrongPenalty" value="5" min="1" max="20">
+                    <span>points</span>
+                </div>
+                <div class="setting-item">
+                    <label>Adjacent key penalty</label>
+                    <input type="number" id="adjacentPenalty" value="4" min="0" max="10">
+                    <span>points</span>
+                </div>
+                <div class="setting-item">
+                    <label>Lesson completion bonus</label>
+                    <input type="number" id="completionBonus" value="10" min="0" max="50">
+                    <span>points</span>
+                </div>
+                <div class="setting-item">
+                    <label>Perfect lesson bonus</label>
+                    <input type="number" id="perfectBonus" value="20" min="0" max="50">
+                    <span>points</span>
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۴: تمرین ===== -->
+            <div class="settings-card">
+                <h3>💪 Practice Mode</h3>
+                <div class="setting-item">
+                    <label>Practice mode</label>
+                    <select id="practiceMode">
+                        <option value="normal">Normal</option>
+                        <option value="hardcore">🔥 Hardcore (no hints)</option>
+                        <option value="zen">🧘 Zen (no timer)</option>
+                        <option value="sprint">🏃 Sprint (fast typing)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Show hand warnings</label>
+                    <input type="checkbox" id="showHandWarning" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show adjacent key hints</label>
+                    <input type="checkbox" id="showAdjacentHints" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Auto focus input</label>
+                    <input type="checkbox" id="autoFocus" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Sound effects</label>
+                    <input type="checkbox" id="soundEffects">
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۵: ظاهر ===== -->
+            <div class="settings-card">
+                <h3>🎨 Appearance</h3>
+                <div class="setting-item">
+                    <label>Theme</label>
+                    <select id="themeSelect">
+                        <option value="dark">🌙 Dark</option>
+                        <option value="light">☀️ Light</option>
+                        <option value="neon">💜 Neon</option>
+                        <option value="matrix">💚 Matrix</option>
+                        <option value="ocean">🌊 Ocean</option>
+                        <option value="sunset">🌅 Sunset</option>
+                        <option value="midnight">🌌 Midnight</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Font size</label>
+                    <input type="range" id="fontSize" min="14" max="32" value="20">
+                    <span id="fontSizeValue">20px</span>
+                </div>
+                <div class="setting-item">
+                    <label>Background animation</label>
+                    <input type="checkbox" id="bgAnimation" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show virtual keyboard</label>
+                    <input type="checkbox" id="showKeyboard" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Keyboard color</label>
+                    <select id="keyboardColor">
+                        <option value="default">Default</option>
+                        <option value="rainbow">🌈 Rainbow</option>
+                        <option value="neon">💜 Neon</option>
+                        <option value="gold">⭐ Gold</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۶: پیشرفت و آمار ===== -->
+            <div class="settings-card">
+                <h3>📊 Progress & Stats</h3>
+                <div class="setting-item">
+                    <label>Show stats in lesson</label>
+                    <input type="checkbox" id="showStats" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Auto-save progress</label>
+                    <input type="checkbox" id="autoSave" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show WPM in real-time</label>
+                    <input type="checkbox" id="showWPM" checked>
+                </div>
+                <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 6px;">
+                    <button id="resetProgressBtn" class="danger-btn">🔄 Reset All Progress</button>
+                </div>
+                <div class="setting-item">
+                    <button id="exportStatsBtn" class="info-btn">📥 Export Statistics</button>
+                    <button id="importStatsBtn" class="info-btn">📤 Import Statistics</button>
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۷: زبان ===== -->
+            <div class="settings-card">
+                <h3>🌍 Language</h3>
+                <div class="setting-item">
+                    <label>Default language</label>
+                    <select id="defaultLanguage">
+                        <option value="english">🇬🇧 English</option>
+                        <option value="persian">🇮🇷 فارسی</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Show language flag</label>
+                    <input type="checkbox" id="showLanguageFlag" checked>
+                </div>
+                <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 6px;">
+                    <button id="manageLanguagesBtn" class="info-btn">📚 Manage Languages</button>
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۸: اعلان‌ها ===== -->
+            <div class="settings-card">
+                <h3>🔔 Notifications</h3>
+                <div class="setting-item">
+                    <label>Show completion notification</label>
+                    <input type="checkbox" id="showCompletionNotif" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show error notification</label>
+                    <input type="checkbox" id="showErrorNotif" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show milestone notifications</label>
+                    <input type="checkbox" id="showMilestoneNotif" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Desktop notifications</label>
+                    <input type="checkbox" id="desktopNotif">
+                </div>
+            </div>
+            
+            <!-- ===== بخش ۹: کیبورد ===== -->
+            <div class="settings-card">
+                <h3>⌨️ Keyboard</h3>
+                <div class="setting-item">
+                    <label>Keyboard layout</label>
+                    <select id="keyboardLayout">
+                        <option value="us">US (QWERTY)</option>
+                        <option value="uk">UK (QWERTY)</option>
+                        <option value="dvorak">Dvorak</option>
+                        <option value="colemak">Colemak</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>Key press animation</label>
+                    <input type="checkbox" id="keyPressAnim" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show key hints</label>
+                    <input type="checkbox" id="showKeyHints" checked>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-actions">
+            <button id="saveSettingsBtn" class="action-btn primary">💾 Save All Settings</button>
+            <button id="resetDefaultsBtn" class="action-btn">🔄 Reset to Defaults</button>
+            <button id="exportSettingsBtn" class="action-btn">📤 Export Settings</button>
+            <button id="importSettingsBtn" class="action-btn">📥 Import Settings</button>
+        </div>
+        
+        <div class="settings-footer">
+            <p>💡 Changes take effect immediately after saving</p>
+            <p id="settingsStatus" style="color: #6a5a7a; font-size: 13px;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== پس‌زمینه =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let angle = 0, length = 0, x = 0, y = 150, step = 0;
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 1.5;
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, 100,
+        canvas.width/2, canvas.height/2, canvas.width*0.7
+    );
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(0.5, '#060612');
+    grad.addColorStop(1, '#000005');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const colors = ['#00ff88', '#00cc66', '#00ffaa', '#66ff99', '#00ff77'];
+    ctx.strokeStyle = colors[Math.floor(step / 40) % colors.length];
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 25;
+
+    if (step < 204) {
+        const rad = angle * Math.PI / 180;
+        const dx = length * Math.cos(rad);
+        const dy = length * Math.sin(rad);
+        ctx.beginPath();
+        ctx.moveTo(centerX + x, centerY - y);
+        ctx.lineTo(centerX + x + dx, centerY - y - dy);
+        ctx.stroke();
+        x += dx; y += dy; length += 3; angle += 1; step++;
+    }
+    
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 100; i++) {
+        const sx = (i * 137.5 + 50) % canvas.width;
+        const sy = (i * 97.3 + 30) % canvas.height;
+        const size = (i % 3) + 1;
+        const alpha = 0.1 + (i % 7) * 0.04;
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    requestAnimationFrame(drawBackground);
+}
+drawBackground();
+
+// ===== تنظیمات =====
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('typlof_settings') || '{}');
+    
+    // بخش سختی
+    document.getElementById('difficultySelect').value = settings.difficulty || 'normal';
+    
+    // بخش زمان
+    document.getElementById('timePerWord').value = settings.timePerWord || 10;
+    document.getElementById('timePerWordValue').textContent = (settings.timePerWord || 10) + 's';
+    document.getElementById('timePenalty').value = settings.timePenalty || 7;
+    document.getElementById('enableTimer').checked = settings.enableTimer !== false;
+    document.getElementById('warningTime').value = settings.warningTime || 3;
+    
+    // بخش امتیازدهی
+    document.getElementById('correctBonus').value = settings.correctBonus || 3;
+    document.getElementById('wrongPenalty').value = settings.wrongPenalty || 5;
+    document.getElementById('adjacentPenalty').value = settings.adjacentPenalty || 4;
+    document.getElementById('completionBonus').value = settings.completionBonus || 10;
+    document.getElementById('perfectBonus').value = settings.perfectBonus || 20;
+    
+    // بخش تمرین
+    document.getElementById('practiceMode').value = settings.practiceMode || 'normal';
+    document.getElementById('showHandWarning').checked = settings.showHandWarning !== false;
+    document.getElementById('showAdjacentHints').checked = settings.showAdjacentHints !== false;
+    document.getElementById('autoFocus').checked = settings.autoFocus !== false;
+    document.getElementById('soundEffects').checked = settings.soundEffects || false;
+    
+    // بخش ظاهر
+    document.getElementById('themeSelect').value = settings.theme || 'dark';
+    document.getElementById('fontSize').value = settings.fontSize || 20;
+    document.getElementById('fontSizeValue').textContent = (settings.fontSize || 20) + 'px';
+    document.getElementById('bgAnimation').checked = settings.bgAnimation !== false;
+    document.getElementById('showKeyboard').checked = settings.showKeyboard !== false;
+    document.getElementById('keyboardColor').value = settings.keyboardColor || 'default';
+    
+    // بخش پیشرفت
+    document.getElementById('showStats').checked = settings.showStats !== false;
+    document.getElementById('autoSave').checked = settings.autoSave !== false;
+    document.getElementById('showWPM').checked = settings.showWPM !== false;
+    
+    // بخش زبان
+    document.getElementById('defaultLanguage').value = settings.defaultLanguage || 'english';
+    document.getElementById('showLanguageFlag').checked = settings.showLanguageFlag !== false;
+    
+    // بخش اعلان‌ها
+    document.getElementById('showCompletionNotif').checked = settings.showCompletionNotif !== false;
+    document.getElementById('showErrorNotif').checked = settings.showErrorNotif !== false;
+    document.getElementById('showMilestoneNotif').checked = settings.showMilestoneNotif !== false;
+    document.getElementById('desktopNotif').checked = settings.desktopNotif || false;
+    
+    // بخش کیبورد
+    document.getElementById('keyboardLayout').value = settings.keyboardLayout || 'us';
+    document.getElementById('keyPressAnim').checked = settings.keyPressAnim !== false;
+    document.getElementById('showKeyHints').checked = settings.showKeyHints !== false;
+    
+    updateDifficultyDesc(settings.difficulty || 'normal');
+    applyTheme(settings.theme || 'dark');
+}
+
+function updateDifficultyDesc(difficulty) {
+    const descs = {
+        'beginner': { text: '🌱 Beginner: Very forgiving, perfect for learning', time: 15, penalty: 3, adjacent: 2, timePenalty: 5, detail: '⏱️ 15s | ❌ -3 | 🔑 -2' },
+        'easy': { text: '🟢 Easy: More time, fewer penalties', time: 12, penalty: 4, adjacent: 3, timePenalty: 6, detail: '⏱️ 12s | ❌ -4 | 🔑 -3' },
+        'normal': { text: '🟡 Normal: Standard typing practice', time: 10, penalty: 5, adjacent: 4, timePenalty: 7, detail: '⏱️ 10s | ❌ -5 | 🔑 -4' },
+        'hard': { text: '🔴 Hard: Less time, more penalties', time: 7, penalty: 8, adjacent: 6, timePenalty: 10, detail: '⏱️ 7s | ❌ -8 | 🔑 -6' },
+        'expert': { text: '💀 Expert: Maximum challenge!', time: 5, penalty: 12, adjacent: 8, timePenalty: 14, detail: '⏱️ 5s | ❌ -12 | 🔑 -8' },
+        'insane': { text: '🔥 Insane: Extreme challenge!', time: 3, penalty: 15, adjacent: 10, timePenalty: 18, detail: '⏱️ 3s | ❌ -15 | 🔑 -10' },
+        'godmode': { text: '👑 God Mode: Only for the brave!', time: 2, penalty: 20, adjacent: 12, timePenalty: 25, detail: '⏱️ 2s | ❌ -20 | 🔑 -12' }
+    };
+    const d = descs[difficulty] || descs['normal'];
+    document.getElementById('difficultyDesc').textContent = d.text;
+    document.getElementById('difficultyDetail').textContent = d.detail;
+    
+    // تنظیم خودکار مقادیر
+    document.getElementById('timePerWord').value = d.time;
+    document.getElementById('timePerWordValue').textContent = d.time + 's';
+    document.getElementById('wrongPenalty').value = d.penalty;
+    document.getElementById('adjacentPenalty').value = d.adjacent;
+    document.getElementById('timePenalty').value = d.timePenalty;
+}
+
+function applyTheme(theme) {
+    const root = document.documentElement;
+    const themes = {
+        'dark': { bg: '#0a0a1a', text: '#f0e8f5', card: 'rgba(13,13,26,0.88)', accent: '#FF6B35' },
+        'light': { bg: '#f0f0f5', text: '#1a1a2e', card: 'rgba(240,240,245,0.92)', accent: '#FF6B35' },
+        'neon': { bg: '#0a0a2a', text: '#ff6bff', card: 'rgba(10,10,42,0.88)', accent: '#ff00ff' },
+        'matrix': { bg: '#001a00', text: '#00ff41', card: 'rgba(0,26,0,0.88)', accent: '#00ff41' },
+        'ocean': { bg: '#001a2a', text: '#4fc3f7', card: 'rgba(0,26,42,0.88)', accent: '#0288d1' },
+        'sunset': { bg: '#2a0a1a', text: '#ffab91', card: 'rgba(42,10,26,0.88)', accent: '#ff6e40' },
+        'midnight': { bg: '#050510', text: '#7986cb', card: 'rgba(5,5,16,0.88)', accent: '#3f51b5' }
+    };
+    const t = themes[theme] || themes['dark'];
+    root.style.setProperty('--bg-color', t.bg);
+    root.style.setProperty('--text-color', t.text);
+    root.style.setProperty('--card-bg', t.card);
+    root.style.setProperty('--accent-color', t.accent);
+    document.body.className = 'theme-' + theme;
+}
+
+function applyFontSize(size) {
+    document.querySelectorAll('.word, .lesson-card-title, .stat-value, .level-info-title, .key').forEach(el => {
+        el.style.fontSize = size + 'px';
+    });
+}
+
+function saveSettings() {
+    const settings = {
+        difficulty: document.getElementById('difficultySelect').value,
+        timePerWord: parseInt(document.getElementById('timePerWord').value),
+        timePenalty: parseInt(document.getElementById('timePenalty').value),
+        enableTimer: document.getElementById('enableTimer').checked,
+        warningTime: parseInt(document.getElementById('warningTime').value),
+        correctBonus: parseInt(document.getElementById('correctBonus').value),
+        wrongPenalty: parseInt(document.getElementById('wrongPenalty').value),
+        adjacentPenalty: parseInt(document.getElementById('adjacentPenalty').value),
+        completionBonus: parseInt(document.getElementById('completionBonus').value),
+        perfectBonus: parseInt(document.getElementById('perfectBonus').value),
+        practiceMode: document.getElementById('practiceMode').value,
+        showHandWarning: document.getElementById('showHandWarning').checked,
+        showAdjacentHints: document.getElementById('showAdjacentHints').checked,
+        autoFocus: document.getElementById('autoFocus').checked,
+        soundEffects: document.getElementById('soundEffects').checked,
+        theme: document.getElementById('themeSelect').value,
+        fontSize: parseInt(document.getElementById('fontSize').value),
+        bgAnimation: document.getElementById('bgAnimation').checked,
+        showKeyboard: document.getElementById('showKeyboard').checked,
+        keyboardColor: document.getElementById('keyboardColor').value,
+        showStats: document.getElementById('showStats').checked,
+        autoSave: document.getElementById('autoSave').checked,
+        showWPM: document.getElementById('showWPM').checked,
+        defaultLanguage: document.getElementById('defaultLanguage').value,
+        showLanguageFlag: document.getElementById('showLanguageFlag').checked,
+        showCompletionNotif: document.getElementById('showCompletionNotif').checked,
+        showErrorNotif: document.getElementById('showErrorNotif').checked,
+        showMilestoneNotif: document.getElementById('showMilestoneNotif').checked,
+        desktopNotif: document.getElementById('desktopNotif').checked,
+        keyboardLayout: document.getElementById('keyboardLayout').value,
+        keyPressAnim: document.getElementById('keyPressAnim').checked,
+        showKeyHints: document.getElementById('showKeyHints').checked
+    };
+    
+    localStorage.setItem('typlof_settings', JSON.stringify(settings));
+    
+    // اعمال تغییرات
+    applyTheme(settings.theme);
+    applyFontSize(settings.fontSize);
+    
+    document.getElementById('settingsStatus').textContent = '✅ Settings saved successfully!';
+    document.getElementById('settingsStatus').style.color = '#00e676';
+    
+    setTimeout(() => {
+        document.getElementById('settingsStatus').textContent = '';
+    }, 3000);
+}
+
+// ===== رویدادها =====
+document.getElementById('difficultySelect').addEventListener('change', function() {
+    updateDifficultyDesc(this.value);
+});
+
+document.getElementById('timePerWord').addEventListener('input', function() {
+    document.getElementById('timePerWordValue').textContent = this.value + 's';
+});
+
+document.getElementById('fontSize').addEventListener('input', function() {
+    document.getElementById('fontSizeValue').textContent = this.value + 'px';
+});
+
+document.getElementById('themeSelect').addEventListener('change', function() {
+    applyTheme(this.value);
+});
+
+document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+
+document.getElementById('resetDefaultsBtn').addEventListener('click', function() {
+    if (confirm('Reset all settings to defaults?')) {
+        localStorage.removeItem('typlof_settings');
+        loadSettings();
+        document.getElementById('settingsStatus').textContent = '✅ Reset to defaults!';
+        document.getElementById('settingsStatus').style.color = '#FFD700';
+        setTimeout(() => {
+            document.getElementById('settingsStatus').textContent = '';
+        }, 3000);
+    }
+});
+
+document.getElementById('resetProgressBtn').addEventListener('click', function() {
+    if (confirm('⚠️ This will delete ALL your progress! Are you sure?')) {
+        fetch('/api/reset_progress', { method: 'POST' })
+            .then(() => {
+                document.getElementById('settingsStatus').textContent = '✅ Progress reset!';
+                document.getElementById('settingsStatus').style.color = '#00e676';
+                setTimeout(() => {
+                    document.getElementById('settingsStatus').textContent = '';
+                }, 3000);
+            })
+            .catch(() => {
+                document.getElementById('settingsStatus').textContent = '❌ Error resetting progress';
+                document.getElementById('settingsStatus').style.color = '#ff5252';
+            });
+    }
+});
+
+document.getElementById('exportStatsBtn').addEventListener('click', function() {
+    fetch('/api/get_progress')
+        .then(res => res.json())
+        .then(data => {
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'typlof_progress_' + new Date().toISOString().slice(0,10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('settingsStatus').textContent = '✅ Stats exported!';
+            document.getElementById('settingsStatus').style.color = '#00e676';
+            setTimeout(() => {
+                document.getElementById('settingsStatus').textContent = '';
+            }, 3000);
+        })
+        .catch(() => {
+            document.getElementById('settingsStatus').textContent = '❌ Error exporting stats';
+            document.getElementById('settingsStatus').style.color = '#ff5252';
+        });
+});
+
+document.getElementById('importStatsBtn').addEventListener('click', function() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                // TODO: import data
+                document.getElementById('settingsStatus').textContent = '✅ Import coming soon!';
+                document.getElementById('settingsStatus').style.color = '#FFD700';
+                setTimeout(() => {
+                    document.getElementById('settingsStatus').textContent = '';
+                }, 3000);
+            } catch(err) {
+                document.getElementById('settingsStatus').textContent = '❌ Invalid JSON file';
+                document.getElementById('settingsStatus').style.color = '#ff5252';
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+});
+
+document.getElementById('exportSettingsBtn').addEventListener('click', function() {
+    const settings = localStorage.getItem('typlof_settings') || '{}';
+    const blob = new Blob([settings], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'typlof_settings_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('settingsStatus').textContent = '✅ Settings exported!';
+    document.getElementById('settingsStatus').style.color = '#00e676';
+    setTimeout(() => {
+        document.getElementById('settingsStatus').textContent = '';
+    }, 3000);
+});
+
+document.getElementById('importSettingsBtn').addEventListener('click', function() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                localStorage.setItem('typlof_settings', JSON.stringify(data));
+                loadSettings();
+                document.getElementById('settingsStatus').textContent = '✅ Settings imported!';
+                document.getElementById('settingsStatus').style.color = '#00e676';
+                setTimeout(() => {
+                    document.getElementById('settingsStatus').textContent = '';
+                }, 3000);
+            } catch(err) {
+                document.getElementById('settingsStatus').textContent = '❌ Invalid JSON file';
+                document.getElementById('settingsStatus').style.color = '#ff5252';
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+});
+
+document.getElementById('manageLanguagesBtn').addEventListener('click', function() {
+    window.location.href = '/login';
+});
+
+// ===== بارگذاری اولیه =====
+loadSettings();
+</script>
+
+</body>
+</html>
+            
+            <!-- ===== بخش ۱۰: نمودار پیشرفت ===== -->
+            <div class="settings-card" style="grid-column: 1 / -1; border: 1px solid rgba(255, 107, 53, 0.12);">
+                <h3>📊 Progress Chart Preview</h3>
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <canvas id="previewChart" style="height: 120px; width: 100%;"></canvas>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 150px;">
+                        <div style="display: flex; justify-content: space-between; color: #8a7a9a; font-size: 13px;">
+                            <span>⭐ Total Score</span>
+                            <span id="previewTotalScore" style="color: #FFD700; font-weight: 700;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #8a7a9a; font-size: 13px;">
+                            <span>✅ Completed</span>
+                            <span id="previewCompleted" style="color: #00e676; font-weight: 700;">0/0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #8a7a9a; font-size: 13px;">
+                            <span>🎯 Accuracy</span>
+                            <span id="previewAccuracy" style="color: #6495ed; font-weight: 700;">0%</span>
+                        </div>
+                        <button id="viewFullChartBtn" class="action-btn" style="margin-top: 4px; padding: 6px 16px; font-size: 12px;">
+                            📊 View Full Charts
+                        </button>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; color: #4a3a5a; font-size: 12px; text-align: center;">
+                    💡 Click "View Full Charts" to see detailed charts like matplotlib plots
+                </div>
+            </div>
+
+<script>
+// ===== نمودار پیش‌نمایش در تنظیمات =====
+let previewChart = null;
+
+async function loadPreviewData() {
+    try {
+        const res = await fetch('/api/get_progress');
+        const data = await res.json();
+        
+        let totalScore = 0;
+        let completed = 0;
+        let totalLessons = 0;
+        
+        // بارگذاری درس‌ها برای تعداد کل
+        const langRes = await fetch('/api/lessons/english');
+        const langData = await langRes.json();
+        totalLessons = (langData.lessons || []).length;
+        
+        for (const key in data) {
+            totalScore += data[key].score || 0;
+            if (data[key].completed) completed++;
+        }
+        
+        const accuracy = totalLessons > 0 ? Math.round((completed / totalLessons) * 100) : 0;
+        
+        document.getElementById('previewTotalScore').textContent = totalScore;
+        document.getElementById('previewCompleted').textContent = completed + '/' + totalLessons;
+        document.getElementById('previewAccuracy').textContent = accuracy + '%';
+        
+        // رسم نمودار کوچک
+        renderPreviewChart(data, totalLessons);
+    } catch (e) {
+        console.error('Error loading preview:', e);
+    }
+}
+
+function renderPreviewChart(data, totalLessons) {
+    const canvas = document.getElementById('previewChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    // داده‌های نمونه برای نمودار
+    const labels = [];
+    const scores = [];
+    
+    // گرفتن ۲۰ درس آخر
+    const keys = Object.keys(data).slice(-20);
+    keys.forEach(key => {
+        labels.push('#' + key);
+        scores.push(data[key].score || 0);
+    });
+    
+    if (previewChart) previewChart.destroy();
+    
+    previewChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels.length > 0 ? labels : ['No Data'],
+            datasets: [{
+                label: 'Score',
+                data: labels.length > 0 ? scores : [0],
+                borderColor: '#FF6B35',
+                backgroundColor: 'rgba(255, 107, 53, 0.15)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false,
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 1000
+            }
+        }
+    });
+}
+
+// دکمه مشاهده نمودار کامل
+document.getElementById('viewFullChartBtn').addEventListener('click', function() {
+    window.location.href = '/charts';
+});
+
+// بارگذاری پیش‌نمایش
+loadPreviewData();
+
+// رفرش هر ۱۰ ثانیه
+setInterval(loadPreviewData, 10000);
+</script>

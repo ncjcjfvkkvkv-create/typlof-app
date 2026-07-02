@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TyplOf — Rules</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container rules-container">
+    <div class="header">
+        <a href="/" class="logo-link">
+            <div class="logo">⌨️ TyplOf</div>
+        </a>
+        <div class="header-right">
+            <a href="/" class="back-home-btn">🏠 Home</a>
+            <a href="/settings" class="back-home-btn">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <div class="rules-content">
+        <h1>📖 Rules & Guidelines</h1>
+        
+        <div class="rules-grid">
+            <div class="rule-card">
+                <div class="rule-icon">⏱️</div>
+                <h3>Time Limit</h3>
+                <p>Each word has a time limit based on its length and difficulty level. If time runs out, you'll lose points and the word resets.</p>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon">⌨️</div>
+                <h3>Virtual Keyboard</h3>
+                <p>The on-screen keyboard shows which keys you should press. Active keys are highlighted in <span style="color:#00ff88;">green</span>, wrong keys in <span style="color:#ff5252;">red</span>.</p>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon">⭐</div>
+                <h3>Scoring System</h3>
+                <ul>
+                    <li>✅ Correct word: <strong>+3 points per character</strong></li>
+                    <li>❌ Wrong word: <strong>-5 points</strong></li>
+                    <li>🔑 Adjacent key error: <strong>-4 extra points</strong></li>
+                    <li>⏰ Time's up: <strong>-5 points</strong></li>
+                </ul>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon">🔒</div>
+                <h3>Sequential Lock</h3>
+                <p>You must complete lessons in order. Each lesson must be finished before unlocking the next one.</p>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon">🌍</div>
+                <h3>Adding New Languages</h3>
+                <p>To add a new language, create a JSON file in the <code>lessons/</code> folder with this format:</p>
+                <pre style="background:#1a1a2e; padding:12px; border-radius:8px; font-size:12px; overflow-x:auto; color:#c0b0d0; border:1px solid rgba(255,107,53,0.1);">
+{
+  "name": "Language Name",
+  "code": "lang_code",
+  "lessons": [
+    {
+      "id": 1,
+      "title": "Lesson Title",
+      "subtitle": "Subtitle",
+      "words": ["word1", "word2", "word3"],
+      "hint_keys": ["a", "s", "d", "f"]
+    }
+  ]
+}</pre>
+                <p style="margin-top:8px;">📁 File name: <code>language_code.json</code> (e.g., <code>spanish.json</code>)</p>
+                <p style="color:#8a7a9a; font-size:13px;">💡 The language will automatically appear in the login page!</p>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon">🏆</div>
+                <h3>Mastery Goal</h3>
+                <p>Complete all lessons with high accuracy and speed to become a professional typist!</p>
+            </div>
+        </div>
+        
+        <div class="rules-footer">
+            <p>💡 <strong>Pro Tip:</strong> Use proper finger placement. Left hand: A S D F | Right hand: J K L ;</p>
+            <p>🐙 <a href="https://github.com/ncjcjfvkkvkv-create/typlof-app" target="_blank">Contribute on GitHub</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let angle = 0, length = 0, x = 0, y = 150, step = 0;
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 1.5;
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, 100,
+        canvas.width/2, canvas.height/2, canvas.width*0.8
+    );
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(0.5, '#050510');
+    grad.addColorStop(1, '#000005');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const colors = ['#00ff88', '#00cc66', '#00ffaa', '#66ff99', '#00ff77'];
+    ctx.strokeStyle = colors[Math.floor(step / 40) % colors.length];
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 25;
+
+    if (step < 204) {
+        const rad = angle * Math.PI / 180;
+        const dx = length * Math.cos(rad);
+        const dy = length * Math.sin(rad);
+        ctx.beginPath();
+        ctx.moveTo(centerX + x, centerY - y);
+        ctx.lineTo(centerX + x + dx, centerY - y - dy);
+        ctx.stroke();
+        x += dx; y += dy; length += 3; angle += 1; step++;
+    }
+    
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 100; i++) {
+        const sx = (i * 137.5 + 50) % canvas.width;
+        const sy = (i * 97.3 + 30) % canvas.height;
+        const size = (i % 3) + 1;
+        const alpha = 0.1 + (i % 7) * 0.04;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    requestAnimationFrame(drawBackground);
+}
+drawBackground();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TyplOf — Professional Typing Trainer</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container">
+    <div class="header">
+        <a href="/" class="logo-link">
+            <div class="logo">⌨️ TyplOf</div>
+        </a>
+        <div class="header-right">
+            <div class="lang-display" id="langDisplay">
+                <span id="currentLangLabel">🇬🇧 English</span>
+                <a href="/login" class="change-lang-btn">🌍 Change</a>
+            </div>
+            <a href="/settings" class="settings-icon" title="Settings">⚙️</a>
+            <a href="/dashboard" class="settings-icon" title="Dashboard">📊</a>
+            <div class="score-display" id="scoreDisplay">
+                ⭐ <span id="totalScore">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="global-progress">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="globalProgressFill" style="width: 0%;"></div>
+        </div>
+        <div class="progress-stats">
+            <span id="completedLessons">0</span> / <span id="totalLessons">0</span> lessons completed
+            <span style="margin-left: 16px; color: #FFD700;">⭐ <span id="totalScoreDisplay">0</span></span>
+        </div>
+    </div>
+
+    <div class="lessons-grid" id="lessonsGrid"></div>
+
+    <div id="typingSection" style="display: none;">
+        <div class="level-info" id="levelInfo"></div>
+        
+        <div class="lesson-rules" id="lessonRules">
+            <div class="rule-badge" id="handRuleBadge">🤲 Both Hands</div>
+            <div class="rule-badge" id="timeRuleBadge">⏱️ <span id="timeLimitDisplay">10</span>s per word</div>
+            <div class="rule-badge" id="levelBadge">📈 Level <span id="levelDisplay">1</span>/<span id="totalLevelsDisplay">150</span></div>
+        </div>
+        
+        <div class="hand-warning" id="handWarning" style="display: none;">
+            ⚠️ Wrong key! Use the correct keys for this lesson.
+        </div>
+
+        <div class="virtual-keyboard" id="virtualKeyboard">
+            <div class="keyboard-row">
+                <div class="key" data-key="q">Q</div>
+                <div class="key" data-key="w">W</div>
+                <div class="key" data-key="e">E</div>
+                <div class="key" data-key="r">R</div>
+                <div class="key" data-key="t">T</div>
+                <div class="key" data-key="y">Y</div>
+                <div class="key" data-key="u">U</div>
+                <div class="key" data-key="i">I</div>
+                <div class="key" data-key="o">O</div>
+                <div class="key" data-key="p">P</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="a">A</div>
+                <div class="key" data-key="s">S</div>
+                <div class="key" data-key="d">D</div>
+                <div class="key" data-key="f">F</div>
+                <div class="key" data-key="g">G</div>
+                <div class="key" data-key="h">H</div>
+                <div class="key" data-key="j">J</div>
+                <div class="key" data-key="k">K</div>
+                <div class="key" data-key="l">L</div>
+                <div class="key" data-key=";">;</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key" data-key="z">Z</div>
+                <div class="key" data-key="x">X</div>
+                <div class="key" data-key="c">C</div>
+                <div class="key" data-key="v">V</div>
+                <div class="key" data-key="b">B</div>
+                <div class="key" data-key="n">N</div>
+                <div class="key" data-key="m">M</div>
+                <div class="key" data-key=",">,</div>
+                <div class="key" data-key=".">.</div>
+                <div class="key" data-key="/">/</div>
+            </div>
+        </div>
+
+        <div class="word-box" id="wordBox">
+            <span style="color:#8a7a9a; font-size:18px;">Select a lesson to start...</span>
+        </div>
+
+        <div class="input-row">
+            <input type="text" id="typing-input" placeholder="Type here..." disabled>
+            <div class="timer" id="timer">⏱️ 0s</div>
+            <div class="timer-limit" id="timerLimit">⏳ <span id="timeLeftDisplay">10</span>s</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card"><div class="stat-label">📍 Progress</div><div class="stat-value" id="progress">0/0</div></div>
+            <div class="stat-card"><div class="stat-label">⚡ Speed</div><div class="stat-value" id="wpm">0</div></div>
+            <div class="stat-card"><div class="stat-label">🎯 Accuracy</div><div class="stat-value" id="accuracy">100%</div></div>
+            <div class="stat-card"><div class="stat-label">⭐ Score</div><div class="stat-value" id="lessonScore">0</div></div>
+        </div>
+
+        <div class="status" id="status">👇 Select a lesson to start</div>
+
+        <div class="actions">
+            <button class="action-btn primary" id="resetBtn">🔄 Retry</button>
+            <button class="action-btn" id="backBtn">🔙 Back to Lessons</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="/dashboard" class="footer-link">📊 Dashboard</a>
+        <a href="/rules" class="footer-link">📖 Rules</a>
+        <a href="/settings" class="footer-link">⚙️ Settings</a>
+        <a href="https://github.com/ncjcjfvkkvkv-create/typlof-app" target="_blank" class="footer-link">🐙 GitHub</a>
+        <span>⚡ TyplOf Web — Professional Typing</span>
+    </div>
+</div>
+
+<script>
+const API = '/api';
+let currentLang = '{{ lang }}';
+let lessons = [];
+let currentLesson = null;
+let currentLessonIndex = -1;
+let words = [];
+let wordIndex = 0;
+let typed = '';
+let errors = 0;
+let totalChars = 0;
+let startTime = null;
+let timerInterval = null;
+let finished = false;
+let lessonScore = 0;
+let timeLimit = 10;
+let totalScore = 0;
+let completedLessons = 0;
+let lessonHandType = 'both';
+let currentHintKeys = [];
+let progressData = {};
+
+const $ = id => document.getElementById(id);
+const lessonsGrid = $('lessonsGrid');
+const typingSection = $('typingSection');
+const levelInfo = $('levelInfo');
+const wordBox = $('wordBox');
+const input = $('typing-input');
+const progress = $('progress');
+const wpm = $('wpm');
+const acc = $('accuracy');
+const status = $('status');
+const timerEl = $('timer');
+const timerLimit = $('timerLimit');
+const timeLeftDisplay = $('timeLeftDisplay');
+const timeLimitDisplay = $('timeLimitDisplay');
+const resetBtn = $('resetBtn');
+const backBtn = $('backBtn');
+const lessonScoreEl = $('lessonScore');
+const totalScoreEl = $('totalScore');
+const totalScoreDisplay = $('totalScoreDisplay');
+const handWarning = $('handWarning');
+const globalProgressFill = $('globalProgressFill');
+const completedLessonsEl = $('completedLessons');
+const totalLessonsEl = $('totalLessons');
+const levelDisplay = $('levelDisplay');
+const totalLevelsDisplay = $('totalLevelsDisplay');
+const handRuleBadge = $('handRuleBadge');
+
+const langNames = { persian: '🇮🇷 فارسی', english: '🇬🇧 English' };
+$('currentLangLabel').textContent = langNames[currentLang] || 'English';
+
+// ===== تنظیمات =====
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('typlof_settings') || '{}');
+    return {
+        difficulty: settings.difficulty || 'normal',
+        timePerWord: settings.timePerWord || 10,
+        timePenalty: settings.timePenalty || 7,
+        enableTimer: settings.enableTimer !== false,
+        correctBonus: settings.correctBonus || 3,
+        wrongPenalty: settings.wrongPenalty || 5,
+        adjacentPenalty: settings.adjacentPenalty || 4,
+        completionBonus: settings.completionBonus || 10,
+        autoFocus: settings.autoFocus !== false,
+        soundEffects: settings.soundEffects || false,
+        showKeyboard: settings.showKeyboard !== false,
+        showHandWarning: settings.showHandWarning !== false,
+        showAdjacentHints: settings.showAdjacentHints !== false
+    };
+}
+
+const settings = loadSettings();
+
+// ===== کیبورد مجازی =====
+function updateVirtualKeyboard(typedWord, expectedWord) {
+    if (!settings.showKeyboard) {
+        const kb = document.getElementById('virtualKeyboard');
+        if (kb) kb.style.display = 'none';
+        return;
+    }
+    const kb = document.getElementById('virtualKeyboard');
+    if (kb) kb.style.display = 'flex';
+    
+    const keys = document.querySelectorAll('.key');
+    keys.forEach(key => {
+        key.classList.remove('active', 'correct', 'wrong');
+    });
+    
+    if (!typedWord || !expectedWord) return;
+    
+    for (let i = 0; i < Math.min(typedWord.length, expectedWord.length); i++) {
+        const typedChar = typedWord[i];
+        const expectedChar = expectedWord[i];
+        
+        const keyEl = document.querySelector('.key[data-key="' + typedChar.toLowerCase() + '"]');
+        const expectedKeyEl = document.querySelector('.key[data-key="' + expectedChar.toLowerCase() + '"]');
+        
+        if (keyEl) {
+            if (typedChar === expectedChar) {
+                keyEl.classList.add('correct');
+            } else {
+                keyEl.classList.add('wrong');
+                if (expectedKeyEl) {
+                    expectedKeyEl.classList.add('active');
+                }
+            }
+        }
+    }
+    
+    if (expectedWord) {
+        const remaining = expectedWord.slice(typedWord.length);
+        for (const ch of remaining) {
+            const keyEl = document.querySelector('.key[data-key="' + ch.toLowerCase() + '"]');
+            if (keyEl) {
+                keyEl.classList.add('active');
+            }
+        }
+    }
+}
+
+// ===== بارگذاری پیشرفت =====
+async function loadProgress() {
+    try {
+        const res = await fetch('/api/get_progress');
+        progressData = await res.json();
+        totalScore = 0;
+        completedLessons = 0;
+        for (const key in progressData) {
+            totalScore += progressData[key].score || 0;
+            if (progressData[key].completed) completedLessons++;
+        }
+        totalScoreEl.textContent = totalScore;
+        totalScoreDisplay.textContent = totalScore;
+        updateGlobalProgress();
+        renderLessonsGrid();
+    } catch (e) {
+        console.error('Error loading progress:', e);
+    }
+}
+
+async function saveProgress(lessonId, scoreChange, completed, timeTaken) {
+    try {
+        const res = await fetch('/api/save_progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                lesson_id: lessonId, 
+                score_change: scoreChange,
+                completed: completed, 
+                time_taken: timeTaken || 0 
+            })
+        });
+        const data = await res.json();
+        if (data.new_score !== undefined) {
+            lessonScore = data.new_score;
+            lessonScoreEl.textContent = lessonScore;
+        }
+        await loadProgress();
+        return data;
+    } catch (e) {
+        console.error('Error saving progress:', e);
+    }
+}
+
+function updateGlobalProgress() {
+    const total = lessons.length;
+    totalLessonsEl.textContent = total;
+    totalLevelsDisplay.textContent = total;
+    completedLessonsEl.textContent = completedLessons;
+    const pct = total > 0 ? (completedLessons / total) * 100 : 0;
+    globalProgressFill.style.width = pct + '%';
+}
+
+// ===== تایمر =====
+let wordTimerInterval = null;
+let timeLeft = 10;
+
+function startWordTimer() {
+    if (wordTimerInterval) return;
+    if (!settings.enableTimer) return;
+    
+    timeLeft = timeLimit;
+    timeLeftDisplay.textContent = timeLeft;
+    timerLimit.style.color = '#FFB300';
+    
+    wordTimerInterval = setInterval(() => {
+        timeLeft--;
+        timeLeftDisplay.textContent = timeLeft;
+        
+        if (timeLeft <= 3) {
+            timerLimit.style.color = '#ff5252';
+        }
+        
+        if (timeLeft <= 0) {
+            // ===== زمان تمام شد =====
+            clearInterval(wordTimerInterval);
+            wordTimerInterval = null;
+            timeLeftDisplay.textContent = '0';
+            timerLimit.style.color = '#ff1744';
+            
+            // ===== جریمه زمان (از نمره اصلی کم میشه) =====
+            const penalty = -(settings.timePenalty || 7);
+            lessonScore += penalty;
+            if (lessonScore < 0) lessonScore = 0;
+            lessonScoreEl.textContent = lessonScore;
+            
+            // ===== ذخیره در سرور =====
+            saveProgress(currentLesson.id, penalty, false, 0);
+            
+            errors++;
+            totalChars += typed.length || 1;
+            status.textContent = '⏰ Time\'s up! ' + penalty + ' points. Try again.';
+            status.className = 'status error';
+            
+            typed = '';
+            input.value = '';
+            updateStats();
+            
+            setTimeout(() => {
+                if (!finished && wordIndex < words.length) {
+                    startWordTimer();
+                    timeLeftDisplay.textContent = timeLimit;
+                    timerLimit.style.color = '#FFB300';
+                }
+            }, 800);
+        }
+    }, 1000);
+}
+
+function resetWordTimer() {
+    if (wordTimerInterval) {
+        clearInterval(wordTimerInterval);
+        wordTimerInterval = null;
+    }
+    timeLeft = timeLimit;
+    timeLeftDisplay.textContent = timeLeft;
+    timerLimit.style.color = '#FFB300';
+}
+
+function startTimer() {
+    if (timerInterval) return;
+    let seconds = 0;
+    timerEl.textContent = '⏱️ 0s';
+    timerInterval = setInterval(() => {
+        seconds++;
+        timerEl.textContent = '⏱️ ' + seconds + 's';
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function resetTimer() {
+    stopTimer();
+    timerEl.textContent = '⏱️ 0s';
+}
+
+// ===== بارگذاری درس‌ها =====
+async function loadLessons(lang) {
+    try {
+        status.textContent = '⏳ Loading...';
+        const res = await fetch('/api/lessons/' + lang);
+        const data = await res.json();
+        
+        if (data.error) {
+            status.textContent = '❌ ' + data.error;
+            return;
+        }
+        
+        lessons = data.lessons || [];
+        
+        if (lessons.length === 0) {
+            status.textContent = '⚠️ No lessons found!';
+            return;
+        }
+        
+        await loadProgress();
+        status.textContent = '✅ ' + lessons.length + ' lessons loaded!';
+    } catch (e) {
+        console.error(e);
+        status.textContent = '❌ Error: ' + e.message;
+    }
+}
+
+function renderLessonsGrid() {
+    lessonsGrid.innerHTML = lessons.map((lesson, index) => {
+        const isCompleted = progressData[lesson.id] && progressData[lesson.id].completed;
+        const isLocked = index > 0 && !(progressData[lessons[index-1].id] && progressData[lessons[index-1].id].completed);
+        const isCurrent = index === 0 || (index > 0 && progressData[lessons[index-1].id] && progressData[lessons[index-1].id].completed);
+        
+        const handIcon = lesson.hand_type === 'left' ? '✋' : lesson.hand_type === 'right' ? '✋' : '🤲';
+        const handLabel = lesson.hand_type === 'left' ? 'Left Hand' : lesson.hand_type === 'right' ? 'Right Hand' : 'Both Hands';
+        const hintKeys = (lesson.hint_keys || []).join(' ');
+        
+        let statusIcon = '⚪';
+        let statusText = 'Not started';
+        if (isCompleted) {
+            statusIcon = '✅';
+            statusText = 'Completed';
+        } else if (isLocked) {
+            statusIcon = '🔒';
+            statusText = 'Locked';
+        } else if (isCurrent) {
+            statusIcon = '▶️';
+            statusText = 'Ready';
+        }
+        
+        return `
+        <div class="lesson-card ${isLocked ? 'locked' : ''}" data-index="${index}">
+            ${isLocked ? '<div class="lock-overlay">🔒</div>' : ''}
+            <div class="lesson-card-number">#${lesson.id || index + 1}</div>
+            <div class="lesson-card-title">${lesson.title || 'No Title'}</div>
+            <div class="lesson-card-subtitle">${lesson.subtitle || ''}</div>
+            <div class="lesson-card-keys">🔑 ${hintKeys || 'All keys'}</div>
+            <div class="lesson-card-words">${(lesson.words || []).length} words</div>
+            <div class="lesson-card-meta">
+                <span class="meta-tag">${handIcon} ${handLabel}</span>
+                <span class="meta-tag">⏱️ ${lesson.time_limit || 10}s</span>
+                <span class="meta-tag">📈 ${index + 1}/${lessons.length}</span>
+            </div>
+            <div class="lesson-card-status">${statusIcon} ${statusText}</div>
+            <button class="lesson-card-btn" data-index="${index}" ${isLocked ? 'disabled' : ''}>
+                ${isLocked ? '🔒' : '▶️ Start'}
+            </button>
+        </div>
+    `}).join('');
+
+    lessonsGrid.querySelectorAll('.lesson-card-btn:not([disabled])').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const index = parseInt(this.dataset.index);
+            loadLesson(index);
+        });
+    });
+
+    lessonsGrid.querySelectorAll('.lesson-card:not(.locked)').forEach(card => {
+        card.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            loadLesson(index);
+        });
+    });
+}
+
+function loadLesson(index) {
+    const lesson = lessons[index];
+    if (!lesson) {
+        status.textContent = '⚠️ Lesson not found!';
+        return;
+    }
+    
+    const isLocked = index > 0 && !(progressData[lessons[index-1].id] && progressData[lessons[index-1].id].completed);
+    if (isLocked) {
+        status.textContent = '🔒 This lesson is locked! Complete the previous lesson first.';
+        status.className = 'status error';
+        return;
+    }
+    
+    currentLesson = lesson;
+    currentLessonIndex = index;
+    words = [...(lesson.words || [])];
+    lessonHandType = lesson.hand_type || 'both';
+    timeLimit = lesson.time_limit || settings.timePerWord || 10;
+    currentHintKeys = lesson.hint_keys || [];
+    
+    wordIndex = 0;
+    typed = '';
+    errors = 0;
+    totalChars = 0;
+    startTime = null;
+    finished = false;
+    lessonScore = 0;
+    resetTimer();
+    resetWordTimer();
+    
+    input.disabled = false;
+    input.value = '';
+    if (settings.autoFocus) input.focus();
+    
+    lessonsGrid.style.display = 'none';
+    typingSection.style.display = 'block';
+    
+    levelInfo.innerHTML = `
+        <div class="level-info-title">${lesson.title}</div>
+        <div class="level-info-subtitle">${lesson.subtitle || ''}</div>
+    `;
+    
+    const handLabel = lessonHandType === 'left' ? '✋ Left Hand Only' : 
+                      lessonHandType === 'right' ? '✋ Right Hand Only' : '🤲 Both Hands';
+    handRuleBadge.textContent = handLabel;
+    timeLimitDisplay.textContent = timeLimit;
+    levelDisplay.textContent = index + 1;
+    
+    lessonScoreEl.textContent = '0';
+    renderWords();
+    updateStats();
+    status.textContent = '✍️ Start typing!';
+    status.className = 'status';
+    handWarning.style.display = 'none';
+    
+    updateVirtualKeyboard('', '');
+    if (currentHintKeys.length > 0) {
+        document.querySelectorAll('.key').forEach(key => {
+            const keyChar = key.dataset.key;
+            if (currentHintKeys.includes(keyChar)) {
+                key.classList.add('hint');
+            } else {
+                key.classList.remove('hint');
+            }
+        });
+    }
+}
+
+function goBackToLessons() {
+    typingSection.style.display = 'none';
+    lessonsGrid.style.display = 'grid';
+    stopTimer();
+    resetWordTimer();
+    resetTimer();
+    input.disabled = true;
+    input.value = '';
+    status.textContent = '📚 Select a lesson';
+    status.className = 'status';
+    renderLessonsGrid();
+    loadProgress();
+}
+
+function renderWords() {
+    if (!words || words.length === 0) {
+        wordBox.innerHTML = '<span style="color:#8a7a9a;">⚠️ This lesson has no words</span>';
+        return;
+    }
+    
+    wordBox.innerHTML = words.map((w, i) => {
+        let cls = 'word';
+        if (i < wordIndex) cls += ' done';
+        else if (i === wordIndex) cls += ' current';
+        else cls += ' pending';
+        return '<span class="' + cls + '">' + w + '</span>';
+    }).join('');
+    
+    progress.textContent = wordIndex + '/' + words.length;
+}
+
+function updateStats() {
+    let wpmVal = 0;
+    if (startTime) {
+        const elapsed = (Date.now() - startTime) / 1000 / 60;
+        const chars = words.slice(0, wordIndex).join('').length + typed.length;
+        wpmVal = elapsed > 0 ? Math.round((chars / 5) / elapsed) : 0;
+    }
+    wpm.textContent = wpmVal;
+
+    const total = Math.max(totalChars + typed.length, 1);
+    const accVal = Math.max(0, 100 - Math.round((errors / total) * 100));
+    acc.textContent = accVal + '%';
+}
+
+function getAdjacentKeys(key) {
+    const adjacent = {
+        'a': ['s', 'q', 'z'],
+        's': ['a', 'd', 'w', 'x'],
+        'd': ['s', 'f', 'e', 'c'],
+        'f': ['d', 'g', 'r', 'v'],
+        'j': ['k', 'h', 'u', 'n'],
+        'k': ['j', 'l', 'i', 'm'],
+        'l': ['k', ';', 'o', ','],
+        ';': ['l', 'p', '.'],
+        'q': ['w', 'a'],
+        'w': ['q', 'e', 's'],
+        'e': ['w', 'r', 'd'],
+        'r': ['e', 't', 'f'],
+        't': ['r', 'y', 'g'],
+        'y': ['t', 'u', 'h'],
+        'u': ['y', 'i', 'j'],
+        'i': ['u', 'o', 'k'],
+        'o': ['i', 'p', 'l'],
+        'p': ['o', '[', ';'],
+        'z': ['x', 's'],
+        'x': ['z', 'c', 'd'],
+        'c': ['x', 'v', 'f'],
+        'v': ['c', 'b', 'g'],
+        'b': ['v', 'n', 'h'],
+        'n': ['b', 'm', 'j'],
+        'm': ['n', ',', 'k']
+    };
+    return adjacent[key.toLowerCase()] || [];
+}
+
+async function checkWord() {
+    if (finished || wordIndex >= words.length) return;
+
+    const expected = words[wordIndex];
+    const typedWord = typed.trim();
+    
+    updateVirtualKeyboard(typedWord, expected);
+
+    let scoreChange = 0;
+
+    if (typedWord === expected) {
+        // ===== درسته =====
+        wordIndex++;
+        totalChars += expected.length;
+        scoreChange = expected.length * settings.correctBonus;
+        lessonScore += scoreChange;
+        
+        // ===== ذخیره در سرور =====
+        await saveProgress(currentLesson.id, scoreChange, false, 0);
+        
+        typed = '';
+        renderWords();
+        updateStats();
+        status.textContent = '✅ Correct! +' + scoreChange + ' points';
+        status.className = 'status success';
+        input.value = '';
+        resetWordTimer();
+        startWordTimer();
+
+        if (wordIndex >= words.length) {
+            finished = true;
+            input.disabled = true;
+            stopTimer();
+            resetWordTimer();
+            const timeTaken = parseInt(timerEl.textContent.replace('⏱️ ', '').replace('s', '')) || 0;
+            // ===== پاداش تکمیل درس =====
+            const completionBonus = settings.completionBonus || 10;
+            lessonScore += completionBonus;
+            await saveProgress(currentLesson.id, completionBonus, true, timeTaken);
+            status.textContent = '🎉 Lesson complete! Score: ' + lessonScore + ' (' + timerEl.textContent + ')';
+            status.className = 'status success';
+        }
+    } else {
+        // ===== اشتباه =====
+        let penalty = settings.wrongPenalty;
+        let details = '';
+        
+        for (let i = 0; i < Math.min(typedWord.length, expected.length); i++) {
+            const typedChar = typedWord[i];
+            const expectedChar = expected[i];
+            
+            if (typedChar !== expectedChar) {
+                const adjacents = getAdjacentKeys(expectedChar);
+                if (adjacents.includes(typedChar.toLowerCase())) {
+                    penalty += settings.adjacentPenalty;
+                    details += ' (' + typedChar + ' → ' + expectedChar + ' is adjacent)';
+                }
+            }
+        }
+        
+        // ===== جریمه اشتباه (منفی) =====
+        scoreChange = -penalty;
+        lessonScore += scoreChange;
+        if (lessonScore < 0) lessonScore = 0;
+        
+        // ===== ذخیره در سرور =====
+        await saveProgress(currentLesson.id, scoreChange, false, 0);
+        
+        errors++;
+        totalChars += typedWord.length;
+        lessonScoreEl.textContent = lessonScore;
+        status.textContent = '❌ Wrong! ' + scoreChange + ' points' + details;
+        status.className = 'status error';
+        typed = '';
+        input.value = '';
+        updateStats();
+        resetWordTimer();
+        startWordTimer();
+    }
+}
+
+input.addEventListener('input', function() {
+    if (finished || wordIndex >= words.length || !words.length) return;
+    if (!startTime) {
+        startTime = Date.now();
+        startTimer();
+        startWordTimer();
+    }
+
+    const value = this.value;
+    typed = value;
+    
+    const expected = words[wordIndex] || '';
+    updateVirtualKeyboard(value, expected);
+
+    if (value.includes(' ') || value.includes('\n')) {
+        typed = value.replace(/\s/g, '');
+        checkWord();
+    } else {
+        updateStats();
+    }
+});
+
+input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (typed.length > 0) checkWord();
+    }
+});
+
+resetBtn.addEventListener('click', function() {
+    if (currentLesson) {
+        loadLesson(currentLessonIndex);
+        status.textContent = '🔄 Restarted!';
+        status.className = 'status';
+    }
+});
+
+backBtn.addEventListener('click', goBackToLessons);
+
+loadLessons(currentLang);
+
+// ===== پس‌زمینه =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let angle = 0, length = 0, x = 0, y = 150, step = 0;
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 1.5;
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, 100,
+        canvas.width/2, canvas.height/2, canvas.width*0.7
+    );
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(0.5, '#060612');
+    grad.addColorStop(1, '#000005');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const colors = ['#00ff88', '#00cc66', '#00ffaa', '#66ff99', '#00ff77'];
+    ctx.strokeStyle = colors[Math.floor(step / 40) % colors.length];
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 25;
+
+    if (step < 204) {
+        const rad = angle * Math.PI / 180;
+        const dx = length * Math.cos(rad);
+        const dy = length * Math.sin(rad);
+        ctx.beginPath();
+        ctx.moveTo(centerX + x, centerY - y);
+        ctx.lineTo(centerX + x + dx, centerY - y - dy);
+        ctx.stroke();
+        x += dx; y += dy; length += 3; angle += 1; step++;
+    }
+    
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 100; i++) {
+        const sx = (i * 137.5 + 50) % canvas.width;
+        const sy = (i * 97.3 + 30) % canvas.height;
+        const size = (i % 3) + 1;
+        const alpha = 0.1 + (i % 7) * 0.04;
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    requestAnimationFrame(drawBackground);
+}
+drawBackground();
+</script>
+
+</body>
+</html>

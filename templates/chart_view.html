@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TyplOf — Charts</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        .chart-view-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chart-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .chart-view-header h1 {
+            color: #f0e8f5;
+            font-size: 28px;
+            font-weight: 900;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .chart-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 107, 53, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .chart-box:hover {
+            border-color: rgba(255, 107, 53, 0.15);
+        }
+        .chart-box h3 {
+            color: #c0b0d0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .chart-box canvas {
+            width: 100% !important;
+            height: 280px !important;
+        }
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+        .chart-full canvas {
+            height: 350px !important;
+        }
+        .back-btn {
+            padding: 10px 24px;
+            border: 1px solid rgba(255, 107, 53, 0.15);
+            border-radius: 10px;
+            background: rgba(255, 107, 53, 0.06);
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background: rgba(255, 107, 53, 0.15);
+            border-color: #FF6B35;
+        }
+        .chart-stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .chart-stat-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 107, 53, 0.06);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .chart-stat-box .num {
+            font-size: 28px;
+            font-weight: 900;
+            color: #f0e8f5;
+        }
+        .chart-stat-box .label {
+            color: #6a5a7a;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .chart-stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container chart-view-container">
+    <div class="chart-view-header">
+        <h1>📊 Chart View</h1>
+        <a href="/settings" class="back-btn">⚙️ Back to Settings</a>
+    </div>
+
+    <div class="chart-stats-row" id="chartStats">
+        <div class="chart-stat-box">
+            <div class="num" id="statTotalScore">0</div>
+            <div class="label">⭐ Total Score</div>
+        </div>
+        <div class="chart-stat-box">
+            <div class="num" id="statCompleted">0/0</div>
+            <div class="label">✅ Completed</div>
+        </div>
+        <div class="chart-stat-box">
+            <div class="num" id="statAccuracy">0%</div>
+            <div class="label">🎯 Accuracy</div>
+        </div>
+        <div class="chart-stat-box">
+            <div class="num" id="statBestWPM">0</div>
+            <div class="label">⚡ Best WPM</div>
+        </div>
+    </div>
+
+    <div class="chart-grid">
+        <!-- نمودار ۱: پیشرفت امتیاز (خطی) -->
+        <div class="chart-box chart-full">
+            <h3>📈 Score Progress (Line Chart)</h3>
+            <canvas id="progressLineChart"></canvas>
+        </div>
+
+        <!-- نمودار ۲: امتیاز هر درس (میله‌ای) -->
+        <div class="chart-box">
+            <h3>📊 Lesson Scores (Bar Chart)</h3>
+            <canvas id="lessonBarChart"></canvas>
+        </div>
+
+        <!-- نمودار ۳: وضعیت تکمیل (دایره‌ای) -->
+        <div class="chart-box">
+            <h3>🎯 Completion Status (Doughnut)</h3>
+            <canvas id="completionDoughnutChart"></canvas>
+        </div>
+
+        <!-- نمودار ۴: سرعت تایپ (خطی) -->
+        <div class="chart-box chart-full">
+            <h3>⚡ Typing Speed Over Time</h3>
+            <canvas id="speedLineChart"></canvas>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; color: #4a3a5a; font-size: 12px;">
+        💡 Charts update automatically based on your progress data
+    </div>
+</div>
+
+<script>
+// ===== پس‌زمینه =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let angle = 0, length = 0, x = 0, y = 150, step = 0;
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 1.5;
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, 100,
+        canvas.width/2, canvas.height/2, canvas.width*0.7
+    );
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(0.5, '#060612');
+    grad.addColorStop(1, '#000005');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const colors = ['#00ff88', '#00cc66', '#00ffaa', '#66ff99', '#00ff77'];
+    ctx.strokeStyle = colors[Math.floor(step / 40) % colors.length];
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 25;
+
+    if (step < 204) {
+        const rad = angle * Math.PI / 180;
+        const dx = length * Math.cos(rad);
+        const dy = length * Math.sin(rad);
+        ctx.beginPath();
+        ctx.moveTo(centerX + x, centerY - y);
+        ctx.lineTo(centerX + x + dx, centerY - y - dy);
+        ctx.stroke();
+        x += dx; y += dy; length += 3; angle += 1; step++;
+    }
+    
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 100; i++) {
+        const sx = (i * 137.5 + 50) % canvas.width;
+        const sy = (i * 97.3 + 30) % canvas.height;
+        const size = (i % 3) + 1;
+        const alpha = 0.1 + (i % 7) * 0.04;
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    requestAnimationFrame(drawBackground);
+}
+drawBackground();
+
+// ===== متغیرها =====
+let progressLineChart = null;
+let lessonBarChart = null;
+let completionDoughnutChart = null;
+let speedLineChart = null;
+
+let progressData = {};
+let lessonsData = [];
+
+// ===== بارگذاری دیتا =====
+async function loadChartData() {
+    try {
+        const res = await fetch('/api/get_progress');
+        progressData = await res.json();
+        
+        const lang = 'english';
+        const lessonsRes = await fetch('/api/lessons/' + lang);
+        const lessonsJson = await lessonsRes.json();
+        lessonsData = lessonsJson.lessons || [];
+        
+        updateStats();
+        renderCharts();
+    } catch (e) {
+        console.error('Error loading chart data:', e);
+    }
+}
+
+function updateStats() {
+    let totalScore = 0;
+    let completed = 0;
+    let bestWPM = 0;
+    
+    for (const key in progressData) {
+        const data = progressData[key];
+        totalScore += data.score || 0;
+        if (data.completed) completed++;
+        if (data.best_time) {
+            const wpm = (data.best_time > 0) ? Math.round((50 / data.best_time) * 60) : 0;
+            if (wpm > bestWPM) bestWPM = wpm;
+        }
+    }
+    
+    const accuracy = lessonsData.length > 0 ? Math.round((completed / lessonsData.length) * 100) : 0;
+    
+    document.getElementById('statTotalScore').textContent = totalScore;
+    document.getElementById('statCompleted').textContent = completed + '/' + lessonsData.length;
+    document.getElementById('statAccuracy').textContent = accuracy + '%';
+    document.getElementById('statBestWPM').textContent = bestWPM || 'N/A';
+}
+
+function renderCharts() {
+    renderProgressLineChart();
+    renderLessonBarChart();
+    renderCompletionDoughnutChart();
+    renderSpeedLineChart();
+}
+
+function renderProgressLineChart() {
+    const canvas = document.getElementById('progressLineChart');
+    if (!canvas) return;
+    const c = canvas.getContext('2d');
+    
+    const labels = [];
+    const scores = [];
+    const completed = [];
+    
+    lessonsData.slice(0, 50).forEach(lesson => {
+        labels.push('#' + lesson.id);
+        const data = progressData[lesson.id];
+        scores.push(data ? data.score || 0 : 0);
+        completed.push(data ? (data.completed ? 100 : 0) : 0);
+    });
+    
+    if (progressLineChart) progressLineChart.destroy();
+    
+    progressLineChart = new Chart(c, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Score',
+                    data: scores,
+                    borderColor: '#FF6B35',
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#FF6B35'
+                },
+                {
+                    label: 'Completed %',
+                    data: completed,
+                    borderColor: '#00e676',
+                    backgroundColor: 'rgba(0, 230, 118, 0.05)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#00e676',
+                    borderDash: [5, 5]
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#c0b0d0', font: { size: 11 } }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#6a5a7a', maxTicksLimit: 20, font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                },
+                y: {
+                    ticks: { color: '#6a5a7a', font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                }
+            }
+        }
+    });
+}
+
+function renderLessonBarChart() {
+    const canvas = document.getElementById('lessonBarChart');
+    if (!canvas) return;
+    const c = canvas.getContext('2d');
+    
+    const labels = [];
+    const scores = [];
+    const colors = [];
+    
+    lessonsData.slice(0, 30).forEach(lesson => {
+        labels.push('#' + lesson.id);
+        const data = progressData[lesson.id];
+        const score = data ? data.score || 0 : 0;
+        scores.push(score);
+        colors.push(data && data.completed ? '#00e676' : '#FF6B35');
+    });
+    
+    if (lessonBarChart) lessonBarChart.destroy();
+    
+    lessonBarChart = new Chart(c, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Score',
+                data: scores,
+                backgroundColor: colors,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#c0b0d0', font: { size: 11 } }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#6a5a7a', maxTicksLimit: 15, font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                },
+                y: {
+                    ticks: { color: '#6a5a7a', font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                }
+            }
+        }
+    });
+}
+
+function renderCompletionDoughnutChart() {
+    const canvas = document.getElementById('completionDoughnutChart');
+    if (!canvas) return;
+    const c = canvas.getContext('2d');
+    
+    let completed = 0;
+    let notCompleted = 0;
+    
+    lessonsData.forEach(lesson => {
+        const data = progressData[lesson.id];
+        if (data && data.completed) completed++;
+        else notCompleted++;
+    });
+    
+    if (completionDoughnutChart) completionDoughnutChart.destroy();
+    
+    completionDoughnutChart = new Chart(c, {
+        type: 'doughnut',
+        data: {
+            labels: ['✅ Completed', '⬜ Not Completed'],
+            datasets: [{
+                data: [completed, notCompleted],
+                backgroundColor: ['#00e676', 'rgba(255, 107, 53, 0.3)'],
+                borderColor: ['#00e676', '#FF6B35'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#c0b0d0', font: { size: 11 } }
+                }
+            }
+        }
+    });
+}
+
+function renderSpeedLineChart() {
+    const canvas = document.getElementById('speedLineChart');
+    if (!canvas) return;
+    const c = canvas.getContext('2d');
+    
+    // داده‌های سرعت (شبیه‌سازی شده از best_time)
+    const labels = [];
+    const speeds = [];
+    
+    lessonsData.slice(0, 50).forEach(lesson => {
+        const data = progressData[lesson.id];
+        if (data && data.best_time) {
+            labels.push('#' + lesson.id);
+            const wpm = (data.best_time > 0) ? Math.round((50 / data.best_time) * 60) : 0;
+            speeds.push(wpm);
+        }
+    });
+    
+    if (speeds.length === 0) {
+        // اگر داده‌ای نبود، داده‌های نمونه
+        for (let i = 0; i < 20; i++) {
+            labels.push('#' + (i+1));
+            speeds.push(Math.round(10 + Math.random() * 40));
+        }
+    }
+    
+    if (speedLineChart) speedLineChart.destroy();
+    
+    speedLineChart = new Chart(c, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'WPM',
+                data: speeds,
+                borderColor: '#FFD700',
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#FFD700'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: '#c0b0d0', font: { size: 11 } }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#6a5a7a', maxTicksLimit: 20, font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                },
+                y: {
+                    ticks: { color: '#6a5a7a', font: { size: 9 } },
+                    grid: { color: 'rgba(255,255,255,0.03)' }
+                }
+            }
+        }
+    });
+}
+
+// ===== بارگذاری =====
+loadChartData();
+
+// ===== رفرش هر ۳۰ ثانیه =====
+setInterval(loadChartData, 30000);
+</script>
+
+</body>
+</html>

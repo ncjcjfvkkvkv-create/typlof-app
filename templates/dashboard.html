@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TyplOf — Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container dashboard-container">
+    <div class="header">
+        <a href="/" class="logo-link">
+            <div class="logo">⌨️ TyplOf</div>
+        </a>
+        <div class="header-right">
+            <a href="/" class="back-home-btn">🏠 Home</a>
+            <a href="/settings" class="back-home-btn">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <h1>📊 Progress Dashboard</h1>
+        
+        <div class="dashboard-stats">
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">⭐</div>
+                <div class="dash-stat-value" id="dashTotalScore">0</div>
+                <div class="dash-stat-label">Total Score</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">✅</div>
+                <div class="dash-stat-value" id="dashCompleted">0/0</div>
+                <div class="dash-stat-label">Lessons Completed</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">🎯</div>
+                <div class="dash-stat-value" id="dashAccuracy">0%</div>
+                <div class="dash-stat-label">Overall Accuracy</div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dash-stat-icon">⚡</div>
+                <div class="dash-stat-value" id="dashBestWPM">0</div>
+                <div class="dash-stat-label">Best WPM</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>📈 Lesson Progress</h3>
+            <div class="chart-bars" id="chartBars">
+                <!-- توسط JS پر می‌شه -->
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>📊 Score History</h3>
+            <div class="chart-line" id="chartLine">
+                <canvas id="scoreChart"></canvas>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3>🔄 Recent Activity</h3>
+            <div class="activity-list" id="activityList">
+                <div class="activity-empty">No activity yet. Start typing!</div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <button id="refreshDashboardBtn" class="action-btn primary">🔄 Refresh</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = '/api';
+
+// ===== پس‌زمینه =====
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let angle = 0, length = 0, x = 0, y = 150, step = 0;
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 1.5;
+
+function drawBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, 100,
+        canvas.width/2, canvas.height/2, canvas.width*0.7
+    );
+    grad.addColorStop(0, '#0a0a1a');
+    grad.addColorStop(0.5, '#060612');
+    grad.addColorStop(1, '#000005');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const colors = ['#00ff88', '#00cc66', '#00ffaa', '#66ff99', '#00ff77'];
+    ctx.strokeStyle = colors[Math.floor(step / 40) % colors.length];
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 25;
+
+    if (step < 204) {
+        const rad = angle * Math.PI / 180;
+        const dx = length * Math.cos(rad);
+        const dy = length * Math.sin(rad);
+        ctx.beginPath();
+        ctx.moveTo(centerX + x, centerY - y);
+        ctx.lineTo(centerX + x + dx, centerY - y - dy);
+        ctx.stroke();
+        x += dx; y += dy; length += 3; angle += 1; step++;
+    }
+    
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 100; i++) {
+        const sx = (i * 137.5 + 50) % canvas.width;
+        const sy = (i * 97.3 + 30) % canvas.height;
+        const size = (i % 3) + 1;
+        const alpha = 0.1 + (i % 7) * 0.04;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    requestAnimationFrame(drawBackground);
+}
+drawBackground();
+
+// ===== بارگذاری دیتا =====
+let progressData = {};
+let lessonsData = [];
+let activityLog = JSON.parse(localStorage.getItem('typlof_activity') || '[]');
+
+async function loadDashboard() {
+    try {
+        // بارگذاری پیشرفت
+        const res = await fetch('/api/get_progress');
+        progressData = await res.json();
+        
+        // بارگذاری درس‌ها
+        const lang = 'english';
+        const lessonsRes = await fetch(`/api/lessons/${lang}`);
+        const lessonsJson = await lessonsRes.json();
+        lessonsData = lessonsJson.lessons || [];
+        
+        renderDashboard();
+    } catch (e) {
+        console.error('Error loading dashboard:', e);
+    }
+}
+
+function renderDashboard() {
+    // آمار کلی
+    let totalScore = 0;
+    let completed = 0;
+    let totalWords = 0;
+    let correctWords = 0;
+    let bestWPM = 0;
+    
+    for (const key in progressData) {
+        const data = progressData[key];
+        totalScore += data.score || 0;
+        if (data.completed) completed++;
+        // تخمین دقت
+        if (data.attempts > 0) {
+            const lesson = lessonsData.find(l => l.id == key);
+            if (lesson && lesson.words) {
+                totalWords += lesson.words.length * data.attempts;
+                // فرض می‌کنیم تقریباً 80% درسته برای درس‌های completed
+                if (data.completed) {
+                    correctWords += lesson.words.length;
+                }
+            }
+        }
+        if (data.best_time) {
+            const wpm = (data.best_time > 0) ? Math.round((50 / data.best_time) * 60) : 0;
+            if (wpm > bestWPM) bestWPM = wpm;
+        }
+    }
+    
+    const accuracy = totalWords > 0 ? Math.round((correctWords / totalWords) * 100) : 0;
+    
+    document.getElementById('dashTotalScore').textContent = totalScore;
+    document.getElementById('dashCompleted').textContent = `${completed}/${lessonsData.length}`;
+    document.getElementById('dashAccuracy').textContent = accuracy + '%';
+    document.getElementById('dashBestWPM').textContent = bestWPM || 'N/A';
+    
+    // نمودار میل‌ای
+    renderChartBars();
+    
+    // نمودار خطی (با Canvas)
+    renderLineChart();
+    
+    // فعالیت‌های اخیر
+    renderActivity();
+}
+
+function renderChartBars() {
+    const container = document.getElementById('chartBars');
+    const completed = lessonsData.filter((l, i) => 
+        progressData[l.id] && progressData[l.id].completed
+    ).length;
+    
+    const total = lessonsData.length;
+    const pct = total > 0 ? (completed / total) * 100 : 0;
+    
+    container.innerHTML = `
+        <div class="chart-bar-container">
+            <div class="chart-bar-label">Overall Progress</div>
+            <div class="chart-bar-track">
+                <div class="chart-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #FF6B35, #FFD700);"></div>
+            </div>
+            <div class="chart-bar-value">${completed}/${total} (${Math.round(pct)}%)</div>
+        </div>
+        ${lessonsData.slice(0, 20).map((lesson, i) => {
+            const done = progressData[lesson.id] && progressData[lesson.id].completed;
+            const score = progressData[lesson.id] ? progressData[lesson.id].score || 0 : 0;
+            const color = done ? '#00e676' : '#4a3a5a';
+            return `
+                <div class="chart-bar-container">
+                    <div class="chart-bar-label">#${lesson.id} ${lesson.title.substring(0, 15)}</div>
+                    <div class="chart-bar-track">
+                        <div class="chart-bar-fill" style="width: ${done ? 100 : 0}%; background: ${color};"></div>
+                    </div>
+                    <div class="chart-bar-value">${done ? '✅ ' + score + 'pts' : '⬜ Not done'}</div>
+                </div>
+            `;
+        }).join('')}
+    `;
+}
+
+function renderLineChart() {
+    const canvas = document.getElementById('scoreChart');
+    if (!canvas) return;
+    
+    const c = canvas.getContext('2d');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const width = rect.width - 40 || 600;
+    const height = 200;
+    
+    canvas.width = width * 2;
+    canvas.height = height * 2;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    c.scale(2, 2);
+    
+    c.clearRect(0, 0, width, height);
+    
+    // داده‌ها
+    const data = lessonsData.filter(l => progressData[l.id]).map(l => ({
+        label: l.id,
+        score: progressData[l.id]?.score || 0,
+        completed: progressData[l.id]?.completed || false
+    }));
+    
+    if (data.length === 0) {
+        c.fillStyle = '#6a5a7a';
+        c.font = '14px Inter';
+        c.textAlign = 'center';
+        c.fillText('No data yet. Complete some lessons!', width/2, height/2);
+        return;
+    }
+    
+    const maxScore = Math.max(10, ...data.map(d => d.score));
+    const padding = 20;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+    const barWidth = Math.min(30, (chartWidth / data.length) * 0.6);
+    const gap = (chartWidth - (barWidth * data.length)) / (data.length + 1);
+    
+    // رسم محورها
+    c.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(padding, padding);
+    c.lineTo(padding, height - padding);
+    c.lineTo(width - padding, height - padding);
+    c.stroke();
+    
+    // رسم میله‌ها
+    data.forEach((d, i) => {
+        const x = padding + gap + i * (barWidth + gap);
+        const barHeight = (d.score / maxScore) * chartHeight;
+        const y = height - padding - barHeight;
+        
+        const color = d.completed ? 
+            `rgba(0, 230, 118, ${0.4 + (d.score / maxScore) * 0.6})` : 
+            'rgba(255, 107, 53, 0.3)';
+        
+        c.fillStyle = color;
+        c.shadowColor = d.completed ? '#00e676' : '#FF6B35';
+        c.shadowBlur = 10;
+        c.beginPath();
+        c.roundRect(x, y, barWidth, barHeight, 4);
+        c.fill();
+        c.shadowBlur = 0;
+        
+        // برچسب
+        c.fillStyle = '#8a7a9a';
+        c.font = '9px Inter';
+        c.textAlign = 'center';
+        c.fillText(d.label, x + barWidth/2, height - padding + 14);
+        
+        // امتیاز
+        c.fillStyle = '#f0e8f5';
+        c.font = '9px Inter';
+        c.fillText(d.score, x + barWidth/2, y - 4);
+    });
+}
+
+function renderActivity() {
+    const container = document.getElementById('activityList');
+    
+    if (activityLog.length === 0) {
+        container.innerHTML = '<div class="activity-empty">No activity yet. Start typing!</div>';
+        return;
+    }
+    
+    container.innerHTML = activityLog.slice(-10).reverse().map(log => `
+        <div class="activity-item ${log.type}">
+            <span class="activity-icon">${log.icon}</span>
+            <span class="activity-text">${log.text}</span>
+            <span class="activity-time">${log.time}</span>
+        </div>
+    `).join('');
+}
+
+// ===== ذخیره فعالیت =====
+function addActivity(type, text, icon) {
+    const now = new Date();
+    const time = now.toLocaleTimeString();
+    activityLog.push({ type, text, icon, time });
+    if (activityLog.length > 100) activityLog.shift();
+    localStorage.setItem('typlof_activity', JSON.stringify(activityLog));
+}
+
+// ===== دکمه رفرش =====
+document.getElementById('refreshDashboardBtn').addEventListener('click', loadDashboard);
+
+// ===== بارگذاری اولیه =====
+loadDashboard();
+
+// ===== اضافه کردن roundRect به Canvas =====
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (r > w/2) r = w/2;
+        if (r > h/2) r = h/2;
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        return this;
+    };
+}
+</script>
+
+</body>
+</html>
