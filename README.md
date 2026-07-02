@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 =======
 # ⌨️ TyplOf — Professional Typing Trainer
 
