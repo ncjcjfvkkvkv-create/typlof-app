@@ -227,6 +227,7 @@ The project includes 4 professional chart types:
 📞 Contact & Links
 
 · GitHub: https://github.com/ncjcjfvkkvkv-create/typlof-app
+. Email: gelitos731@wproll.com
 · Issues: Report Bug or Suggestion
 
 ---
