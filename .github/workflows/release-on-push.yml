@@ -1,0 +1,70 @@
+name: 🚀 Auto Release on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Create ZIP Archive
+        run: zip -r typlof-app.zip . -x "*.git*" ".github/*" "__pycache__/*" "*.pyc"
+
+      - name: 🏷️ Generate Version Tag
+        id: tag
+        run: |
+          VERSION=$(date +'v%Y.%m.%d-%H%M%S')
+          echo "TAG_NAME=$VERSION" >> $GITHUB_ENV
+          echo "RELEASE_NAME=TyplOf New Release - $VERSION" >> $GITHUB_ENV
+
+      - name: ✨ Create Beautiful Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.RELEASE_NAME }}
+          body: |
+            ## 🎉 New TyplOf Release!
+            
+            ### ✨ What's New in This Version:
+            - 📦 Project updated to latest version
+            - 🐛 Bug fixes and improvements
+            - ⚡ Performance enhancements
+            - 🔧 Minor code adjustments
+            
+            ### 🚀 Installation:
+            ```bash
+            git clone https://github.com/ncjcjfvkkvkv-create/typlof-app.git
+            cd typlof-app
+            pip install flask
+            python app.py
+            ```
+            
+            ### 📱 Termux Installation:
+            ```bash
+            pkg update && pkg upgrade
+            pkg install python git
+            git clone https://github.com/ncjcjfvkkvkv-create/typlof-app.git
+            cd typlof-app
+            pip install flask
+            python app.py
+            ```
+            
+            ### ⭐ Support the Project
+            If you like this project, please give it a **🌟 Star** and share it with your friends!
+            
+            ❤️ Made with love for touch typing enthusiasts
+            
+            Release Date: $(date +'%Y-%m-%d %H:%M:%S')
+          draft: false
+          prerelease: false
+          files: typlof-app.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
