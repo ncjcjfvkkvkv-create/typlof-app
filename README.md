@@ -243,7 +243,11 @@ If you like this project, please give it a ⭐ and share it with your friends!
 
 ---
 
+
 Made with ❤️ for touch typing enthusiasts
 
 ⭐ Star | 🍴 Fork | 🐛 Report Issues
+
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ncjcjfvkkvkv-create/typlof-app&type=date&legend=top-left)](https://www.star-history.com/#ncjcjfvkkvkv-create/typlof-app&type=date&legend=top-left)
 
