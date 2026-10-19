@@ -1,4 +1,4 @@
-
+https://api.star-history.com/chart?repos=ncjcjfvkkvkv-create/typlof-app%2Cboid/boid&type=date&theme=dark&legend=top-left
 
 =======
 # ⌨️ TyplOf — Professional Typing Trainer
